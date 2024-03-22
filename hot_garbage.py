@@ -14,6 +14,8 @@ def app():
     # Create a session and set the cookies
     session = requests.Session()
     jar = requests.cookies.RequestsCookieJar()
+    jar.set("X-CSRF-Token", x_csrf_token)
+    jar.set("_gorilla_csrf", gorilla_csrf)
     jar.set("access_token", access_token)
     jar.set("session_uuid", session_uuid)
     session.cookies = jar
@@ -27,8 +29,6 @@ def app():
             "Accept": "application/json, text/plain, */*",
             "Accept-Language": "en-US,en;q=0.5",
             "Accept-Encoding": "gzip, deflate, br",
-            "X-CSRF-Token": x_csrf_token,
-            "_gorilla_csrf": gorilla_csrf,
             "Content-Type": "application/json",
             "Cache-Control": "no-cache",
             "Expires": "0",
@@ -38,11 +38,6 @@ def app():
             "Referer": "https://yodayo.com/",
             "TE": "trailers"
         }
-        cookies = {
-            "_gorilla_csrf": gorilla_csrf,
-            "access_token": access_token,
-            "session_uuid": session_uuid
-        }
         payload = {
             "page": {
                 "current": page,
@@ -51,7 +46,7 @@ def app():
             "top_time": "day"
         }
 
-        response = session.post(url, headers=headers, params=params, cookies=cookies, json=payload)
+        response = session.post(url, headers=headers, params=params, json=payload)
 
         if response.status_code == 200:
             try:
