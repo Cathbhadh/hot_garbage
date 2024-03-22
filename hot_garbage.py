@@ -66,21 +66,21 @@ def fetch_data(page=1, size=50):
 
 
     # Function to process the data
-    def process_data(data):
-        nsfw_count = {
-            "true": 0,
-            "false": 0
-        }
-        unique_names = set()
-        total_posts = data["page"]["total_results"]
+def process_data(data):
+    nsfw_count = {
+        "true": 0,
+        "false": 0
+    }
+    unique_names = set()
+    total_posts = data["page"]["total_results"]
 
-        for post in data["posts"]:
-            if post["nsfw"]:
-                nsfw_count["true"] += 1
-            else:
-                nsfw_count["false"] += 1
+    for post in data["posts"]:
+        if post["nsfw"]:
+            nsfw_count["true"] += 1
+        else:
+            nsfw_count["false"] += 1
 
-            unique_names.add(post["profile"]["name"])
+        unique_names.add(post["profile"]["name"])
 
         nsfw_percentages = {
             "true": (nsfw_count["true"] / total_posts) * 100,
