@@ -5,7 +5,9 @@ import streamlit as st
 def fetch_data(page=1, size=50):
     url = f"https://api.yodayo.com/v1/search/posts/trending?include_nsfw=true"
     headers = {
-        "X-CSRF-Token": "waZxH9cm56MaLLVNgNNDF7awzAIu0cJ5mlRDImEYaiFCdYEHo3HwVfBy1ag00tSpR8jkim1m/dzD4DRB7mkOXQ=="  # Replace with your X-CSRF-Token
+        "X-CSRF-Token": st.secrets["X-CSRF-Token"],  # Use st.secrets to access the X-CSRF-Token secret
+        "_gorilla_csrf": st.secrets["_gorilla_csrf"],  # Use st.secrets to access the _gorilla_csrf secret
+        "Authorization": f"Bearer {st.secrets['access_token']}"  # Add Authorization header if needed
     }
     payload = {
         "page": {
