@@ -1,116 +1,37 @@
-import requests
 import streamlit as st
+import requests
+import json
 
-# Streamlit app
-def app():
-    st.title("Yodayo API Data Processing")
+# Function to fetch data from the API
+def fetch_data():
+    url = "https://api.yodayo.com/v1/search/posts/trending?include_nsfw=true"
+    headers = {
+        "Cookie": "_gorilla_csrf=MTcxMTA5MjQwMHxJbVZIYmtkUGRtWlhSMmRWVlVkMVJsVkJSM2t5TUZkdlFtaHNTRWRwVW1Gd2FrdHJSMGQ0UVhFellVRTlJZ289fOntumACkEjK3RFvg1K07DtcfgLSup16Qu7-0IcbmMWz; access_token=eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjozODU3MTksImV4cCI6MTcxMTY4NDE1M30.n_bT2cjnI11GoUIDgd_AbomLAIz37jJtAYAgCLfdgyHjwIzo7-C_03dBa5zPYcB-nqwxAmUz8CoTVtsgAYod4bz76nkRNxdXjfDsd3nCqMJ2qxEVDYLGacNKLLicSnuVo2NHv0moj2d7K9djZJbQsyUr-gAj_9uvSNx0Hh8gg74uYO9Drt1UrivPqX-D_We9bGV1dfrCWpJAzC9IvLXhZgZFmve945_IkiHgkjIII44_xlwIZ79zXcAK0ACQdpiKrURJAVhE4SiZ5lxXJuCBVHoPpPijuHC-eOe6AuEfRjxdiZ-JnJc5lkZgOV9NnBaVpzT6Xm88sPtTcEt24vxvT0pUVBQDLiulce5qxibzHVTByVma2UCqa-paG6VvaqUSuA4kRBHO9w1GtfMNQB3TF0LCblIuqq99mElioIcTDli-tq05FFBe33-taZxxJVcU3H4DhfZRQfFCKAfFCVl_bfo6ukybMv2ubTwWHjNpqmrVZ0ADLLdgp2X_xjksZAGPpBpc9cKlzLEpvA7LAHYC1O4QVp6-1M0n1R8tvBuQ76AyZTX8y0yzYrJX3mlEkcBYseySdxL-bOVdtglWn2FFjmWPDHhhWb_feXfOEZKqgraw4O7wTH_uIdAxNS6x6IRiggasqJbsOktcVmmUNbkhjtobztMQtXtAG0DxGyevDhk; session_uuid=2217dc62-ea78-4ba7-9f7f-93684bf840b6",
+        "X-CSRF-Token": "SL79mfkhUYI0RTc7QvpPqemuH8/85bPAyIEJAFob0Qcw1zujDvdLhyBf1m9Clvl4g6+ZnjpspWlEKA8bSjEMpw=="
+    }
+    response = requests.get(url, headers=headers)
+    data = response.json()
+    return data
 
-    # Get user input for tokens and cookies
-    gorilla_csrf = st.text_input("Enter your _gorilla_csrf:", type="password")
-    access_token = st.text_input("Enter your access_token:", type="password")
-    session_uuid = st.text_input("Enter your session_uuid:", type="password")
-
-    # Create a session and set the cookies
-    session = requests.Session()
-    jar = requests.cookies.RequestsCookieJar()
-    jar.set("access_token", access_token)
-    jar.set("session_uuid", session_uuid)
-    session.cookies = jar
-
-    # Function to fetch data from the API
-    def fetch_data(page=1, size=50):
-        url = "https://api.yodayo.com/v1/search/posts/trending"
-        params = {"include_nsfw": "true"}
-        headers = {
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; rv:124.0) Gecko/20100101 Firefox/124.0",
-            "Accept": "application/json, text/plain, */*",
-            "Accept-Language": "en-US,en;q=0.5",
-            "Accept-Encoding": "gzip, deflate, br",
-            "X-CSRF-Token": gorilla_csrf,
-            "_gorilla_csrf": gorilla_csrf,
-            "Content-Type": "application/json",
-            "Cache-Control": "no-cache",
-            "Expires": "0",
-            "Origin": "https://yodayo.com",
-            "DNT": "1",
-            "Connection": "keep-alive",
-            "Referer": "https://yodayo.com/",
-            "TE": "trailers"
-        }
-        cookies = {
-            "_gorilla_csrf": gorilla_csrf,
-            "access_token": access_token,
-            "session_uuid": session_uuid
-        }
-        payload = {
-            "page": {
-                "current": page,
-                "size": size
-            },
-            "top_time": "day"
-        }
-
-        response = requests.post(url, headers=headers, params=params, cookies=cookies, json=payload)
-
-        if response.status_code == 200:
-            try:
-                data = response.json()
-                return data
-            except ValueError:
-                st.error("Error: Could not parse the response as JSON.")
-        else:
-            st.error(f"Error: API request failed with status code {response.status_code}")
-
-        return None
-
-    # Function to process the data
-    def process_data(data):
-        nsfw_count = {
-            "true": 0,
-            "false": 0
-        }
-        unique_names = set()
-        total_posts = data["page"]["total_results"]
-
-        for post in data["posts"]:
-            if post["nsfw"]:
-                nsfw_count["true"] += 1
-            else:
-                nsfw_count["false"] += 1
-
-            unique_names.add(post["profile"]["name"])
-
-        nsfw_percentages = {
-            "true": (nsfw_count["true"] / total_posts) * 100,
-            "false": (nsfw_count["false"] / total_posts) * 100
-        }
-
-        return nsfw_count, nsfw_percentages, len(unique_names), total_posts
+# Main Streamlit app
+def main():
+    st.title("Trending Posts Analysis")
 
     # Fetch data from the API
     data = fetch_data()
 
-    # Check if data fetching was successful
-    if data is None:
-        st.error("Error: Could not fetch data from the API.")
-    else:
-        # Process the data
-        nsfw_count, nsfw_percentages, unique_name_count, total_posts = process_data(data)
+    # Display the number of posts
+    num_posts = len(data["posts"])
+    st.write(f"Total number of posts: {num_posts}")
 
-        # Display the results
-        st.subheader("NSFW Count")
-        st.write(f"True: {nsfw_count['true']}")
-        st.write(f"False: {nsfw_count['false']}")
-
-        st.subheader("NSFW Percentages")
-        st.write(f"True: {nsfw_percentages['true']:.2f}%")
-        st.write(f"False: {nsfw_percentages['false']:.2f}%")
-
-        st.subheader("Number of Unique Names")
-        st.write(unique_name_count)
-
-        st.subheader("Total Posts")
-        st.write(total_posts)
+    # Display post details
+    for post in data["posts"]:
+        st.subheader(post["title"])
+        st.write(f"Description: {post['description']}")
+        st.write(f"Likes: {post['likes']}")
+        st.write(f"Hashtags: {', '.join(post['hashtags'])}")
+        st.image(post["photo_media"][0]["url"])
+        st.write("---")
 
 if __name__ == "__main__":
-    app()
+    main()
