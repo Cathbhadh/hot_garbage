@@ -7,6 +7,7 @@ def fetch_trending_posts(cookie):
         "Cookie": cookie
     }
     response = requests.get("https://api.yodayo.com/v1/search/posts/trending?include_nsfw=true", headers=headers)
+    st.write(response.content)  # Add this line to print the response content
     posts = response.json()["posts"]
     return posts
 
