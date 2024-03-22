@@ -50,9 +50,15 @@ def app():
             },
             "top_time": "day"
         }
-
+    
         response = requests.post(url, headers=headers, params=params, cookies=cookies, json=payload)
-
+    
+        # Print the response status code
+        print(f"Response status code: {response.status_code}")
+    
+        # Print the raw response text
+        print(f"Response text: {response.text}")
+    
         if response.status_code == 200:
             try:
                 data = response.json()
@@ -61,7 +67,7 @@ def app():
                 st.error("Error: Could not parse the response as JSON.")
         else:
             st.error(f"Error: API request failed with status code {response.status_code}")
-
+    
         return None
 
     # Function to process the data
