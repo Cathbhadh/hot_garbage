@@ -7,6 +7,7 @@ def fetch_trending_posts(cookie_components):
         "Cookie": "; ".join(cookie_components)
     }
     response = requests.get("https://api.yodayo.com/v1/search/posts/trending?include_nsfw=true", headers=headers)
+    st.write(f"Response content: {response.content}")  # Add this line
     response_text = response.text
 
     # Find the start and end indices of the "posts" list
