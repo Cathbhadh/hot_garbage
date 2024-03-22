@@ -19,35 +19,51 @@ def app():
     session.cookies = jar
 
     # Function to fetch data from the API
-    def fetch_data(page=1, size=50):
-        url = f"https://api.yodayo.com/v1/search/posts/trending?include_nsfw=true"
-        headers = {
-            "X-CSRF-Token": x_csrf_token,
-            "_gorilla_csrf": gorilla_csrf,
-            "Authorization": f"Bearer {access_token}"
-        }
-        payload = {
-            "page": {
-                "current": page,
-                "size": size
-            },
-            "top_time": "day"
-        }
-        response = session.post(url, headers=headers, json=payload)
+def fetch_data(page=1, size=50):
+    url = "https://api.yodayo.com/v1/search/posts/trending"
+    params = {"include_nsfw": "true"}
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; rv:124.0) Gecko/20100101 Firefox/124.0",
+        "Accept": "application/json, text/plain, */*",
+        "Accept-Language": "en-US,en;q=0.5",
+        "Accept-Encoding": "gzip, deflate, br",
+        "X-CSRF-Token": st.secrets["X-CSRF-Token"],
+        "_gorilla_csrf": st.secrets["_gorilla_csrf"],
+        "Content-Type": "application/json",
+        "Cache-Control": "no-cache",
+        "Expires": "0",
+        "Origin": "https://yodayo.com",
+        "DNT": "1",
+        "Connection": "keep-alive",
+        "Referer": "https://yodayo.com/",
+        "TE": "trailers"
+    }
+    cookies = {
+        "_gorilla_csrf": st.secrets["_gorilla_csrf"],
+        "access_token": st.secrets["access_token"],
+        "session_uuid": st.secrets["session_uuid"]
+    }
+    payload = {
+        "page": {
+            "current": page,
+            "size": size
+        },
+        "top_time": "day"
+    }
 
-        # Check if the request was successful
-        if response.status_code == 200:
-            try:
-                # Try to parse the response as JSON
-                data = response.json()
-                return data
-            except ValueError:
-                st.error("Error: Could not parse the response as JSON.")
-        else:
-            st.error(f"Error: API request failed with status code {response.status_code}")
+    response = requests.post(url, headers=headers, params=params, cookies=cookies, json=payload)
 
-        # Return None if there was an error
-        return None
+    if response.status_code == 200:
+        try:
+            data = response.json()
+            return data
+        except ValueError:
+            st.error("Error: Could not parse the response as JSON.")
+    else:
+        st.error(f"Error: API request failed with status code {response.status_code}")
+
+    return None
+
 
     # Function to process the data
     def process_data(data):
