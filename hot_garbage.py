@@ -5,9 +5,9 @@ import streamlit as st
 def fetch_data(page=1, size=50):
     url = f"https://api.yodayo.com/v1/search/posts/trending?include_nsfw=true"
     headers = {
-        "X-CSRF-Token": st.secrets["X-CSRF-Token"],  # Use st.secrets to access the X-CSRF-Token secret
-        "_gorilla_csrf": st.secrets["_gorilla_csrf"],  # Use st.secrets to access the _gorilla_csrf secret
-        "Authorization": f"Bearer {st.secrets['access_token']}"  # Add Authorization header if needed
+        "X-CSRF-Token": st.secrets["X-CSRF-Token"],
+        "_gorilla_csrf": st.secrets["_gorilla_csrf"],
+        "Authorization": f"Bearer {st.secrets['access_token']}"
     }
     payload = {
         "page": {
@@ -17,8 +17,20 @@ def fetch_data(page=1, size=50):
         "top_time": "day"
     }
     response = requests.post(url, headers=headers, json=payload)
-    return response.json()
 
+    # Check if the request was successful
+    if response.status_code == 200:
+        try:
+            # Try to parse the response as JSON
+            data = response.json()
+            return data
+        except ValueError:
+            st.error("Error: Could not parse the response as JSON.")
+    else:
+        st.error(f"Error: API request failed with status code {response.status_code}")
+
+    # Return None if there was an error
+    return None
 # Function to process the data
 def process_data(data):
     nsfw_count = {
