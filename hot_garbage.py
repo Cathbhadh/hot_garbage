@@ -54,10 +54,10 @@ def app():
         response = requests.post(url, headers=headers, params=params, cookies=cookies, json=payload)
     
         # Print the response status code
-        print(f"Response status code: {response.status_code}")
+        st.write(f"Response status code: {response.status_code}")
     
         # Print the raw response text
-        print(f"Response text: {response.text}")
+        st.write(f"Response text: {response.text}")
     
         if response.status_code == 200:
             try:
