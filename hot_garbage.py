@@ -2,12 +2,14 @@ import requests
 import streamlit as st
 
 # Function to fetch data from the API
+# Function to fetch data from the API
 def fetch_data(page=1, size=50):
     url = f"https://api.yodayo.com/v1/search/posts/trending?include_nsfw=true"
     headers = {
         "X-CSRF-Token": st.secrets["X-CSRF-Token"],
         "_gorilla_csrf": st.secrets["_gorilla_csrf"],
-        "Authorization": f"Bearer {st.secrets['access_token']}"
+        "Authorization": f"Bearer {st.secrets['access_token']}",
+        "Session-UUID": st.secrets["session_uuid"]  # Include the session_uuid header
     }
     payload = {
         "page": {
