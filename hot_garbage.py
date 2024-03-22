@@ -19,51 +19,50 @@ def app():
     session.cookies = jar
 
     # Function to fetch data from the API
-def fetch_data(page=1, size=50):
-    url = "https://api.yodayo.com/v1/search/posts/trending"
-    params = {"include_nsfw": "true"}
-    headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; rv:124.0) Gecko/20100101 Firefox/124.0",
-        "Accept": "application/json, text/plain, */*",
-        "Accept-Language": "en-US,en;q=0.5",
-        "Accept-Encoding": "gzip, deflate, br",
-        "X-CSRF-Token": st.secrets["X-CSRF-Token"],
-        "_gorilla_csrf": st.secrets["_gorilla_csrf"],
-        "Content-Type": "application/json",
-        "Cache-Control": "no-cache",
-        "Expires": "0",
-        "Origin": "https://yodayo.com",
-        "DNT": "1",
-        "Connection": "keep-alive",
-        "Referer": "https://yodayo.com/",
-        "TE": "trailers"
-    }
-    cookies = {
-        "_gorilla_csrf": st.secrets["_gorilla_csrf"],
-        "access_token": st.secrets["access_token"],
-        "session_uuid": st.secrets["session_uuid"]
-    }
-    payload = {
-        "page": {
-            "current": page,
-            "size": size
-        },
-        "top_time": "day"
-    }
+    def fetch_data(x_csrf_token, gorilla_csrf, access_token, session_uuid, page=1, size=50):
+        url = "https://api.yodayo.com/v1/search/posts/trending"
+        params = {"include_nsfw": "true"}
+        headers = {
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; rv:124.0) Gecko/20100101 Firefox/124.0",
+            "Accept": "application/json, text/plain, */*",
+            "Accept-Language": "en-US,en;q=0.5",
+            "Accept-Encoding": "gzip, deflate, br",
+            "X-CSRF-Token": x_csrf_token,
+            "_gorilla_csrf": gorilla_csrf,
+            "Content-Type": "application/json",
+            "Cache-Control": "no-cache",
+            "Expires": "0",
+            "Origin": "https://yodayo.com",
+            "DNT": "1",
+            "Connection": "keep-alive",
+            "Referer": "https://yodayo.com/",
+            "TE": "trailers"
+        }
+        cookies = {
+            "_gorilla_csrf": gorilla_csrf,
+            "access_token": access_token,
+            "session_uuid": session_uuid
+        }
+        payload = {
+            "page": {
+                "current": page,
+                "size": size
+            },
+            "top_time": "day"
+        }
 
-    response = requests.post(url, headers=headers, params=params, cookies=cookies, json=payload)
+        response = requests.post(url, headers=headers, params=params, cookies=cookies, json=payload)
 
-    if response.status_code == 200:
-        try:
-            data = response.json()
-            return data
-        except ValueError:
-            st.error("Error: Could not parse the response as JSON.")
-    else:
-        st.error(f"Error: API request failed with status code {response.status_code}")
+        if response.status_code == 200:
+            try:
+                data = response.json()
+                return data
+            except ValueError:
+                st.error("Error: Could not parse the response as JSON.")
+        else:
+            st.error(f"Error: API request failed with status code {response.status_code}")
 
-    return None
-
+        return None
 
     # Function to process the data
     def process_data(data):
@@ -90,7 +89,7 @@ def fetch_data(page=1, size=50):
         return nsfw_count, nsfw_percentages, len(unique_names), total_posts
 
     # Fetch data from the API
-    data = fetch_data()
+    data = fetch_data(x_csrf_token, gorilla_csrf, access_token, session_uuid)
 
     # Check if data fetching was successful
     if data is None:
